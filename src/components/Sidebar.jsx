@@ -35,6 +35,18 @@ const Sidebar = () => {
             <span className='hidden md:inline'>Orders</span>
           </NavLink>
 
+          {/* All Users */}
+           <NavLink to="/Users" className={linkClasses}>
+            <img className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" src={assets.user_icon} alt="Orders" />
+            <span className='hidden md:inline'>All Users</span>
+          </NavLink>
+
+           {/* Analysis */}
+           <NavLink to="/Analysis" className={linkClasses}>
+            <img className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" src={assets.analysis_icon} alt="Orders" />
+            <span className='hidden md:inline'>Analysis</span>
+          </NavLink>
+
         </nav>
       </div>
     </div>

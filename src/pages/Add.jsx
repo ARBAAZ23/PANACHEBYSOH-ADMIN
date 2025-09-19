@@ -12,6 +12,7 @@ const Add = () => {
   const [category, setCategory] = useState("");
   const [sizes, setSizes] = useState([]);
   const [bestseller, setBestseller] = useState(false);
+  const [stock, setStock] = useState(""); // ✅ new state for stock
 
   const handleImageChange = (e, index) => {
     const file = e.target.files[0];
@@ -33,47 +34,56 @@ const Add = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const token = localStorage.getItem("token"); // or however you store it
+    const token = localStorage.getItem("token");
 
-  const formData = new FormData();
-  formData.append("name", productName);
-  formData.append("description", description);
-  formData.append("price", price);
-  formData.append("category", category);
-  formData.append("sizes", JSON.stringify(sizes));
-  formData.append("bestseller", bestseller);
+    const formData = new FormData();
+    formData.append("name", productName);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("category", category);
+    formData.append("sizes", JSON.stringify(sizes));
+    formData.append("bestseller", bestseller);
+    formData.append("stock", stock); // ✅ send stock value to backend
 
-  images.forEach((file, i) => {
-    if (file) {
-      formData.append(`image${i + 1}`, file);
-    }
-  });
-
-  try {
-    const res = await fetch(backendUrl + "api/product/add", {
-      method: "POST",
-      headers: {
-        token: token, // required for authentication
-      },
-      body: formData,
+    images.forEach((file, i) => {
+      if (file) {
+        formData.append(`image${i + 1}`, file);
+      }
     });
 
-    const data = await res.json();
-    console.log("Server response:", data);
+    try {
+      const res = await fetch(backendUrl + "api/product/add", {
+        method: "POST",
+        headers: {
+          token: token,
+        },
+        body: formData,
+      });
 
-    if (res.ok) {
-      alert("Product added successfully!");
-    } else {
-      alert("Error: " + data.message);
+      const data = await res.json();
+      console.log("Server response:", data);
+
+      if (res.ok) {
+        alert("Product added successfully!");
+        setProductName("");
+        setDescription("");
+        setPrice("");
+        setCategory("");
+        setSizes([]);
+        setBestseller(false);
+        setStock("");
+        setImages(Array(5).fill(null));
+        setImagePreviews(Array(5).fill(null));
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to add product.");
     }
-  } catch (error) {
-    console.error(error);
-    alert("Failed to add product.");
-  }
-};
-
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4 max-w-3xl mx-auto">
@@ -137,6 +147,19 @@ const Add = () => {
           required
           value={price}
           onChange={(e) => setPrice(e.target.value)}
+          className="border p-2 rounded w-full"
+        />
+      </div>
+
+      {/* Stock */}
+      <div>
+        <p className="font-semibold">Product Stock</p>
+        <input
+          type="number"
+          placeholder="Enter stock quantity"
+          required
+          value={stock}
+          onChange={(e) => setStock(e.target.value)}
           className="border p-2 rounded w-full"
         />
       </div>

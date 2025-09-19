@@ -22,8 +22,9 @@ const List = ({ token }) => {
   };
 
   const removeProduct = async (id) => {
-    // Ask admin for confirmation
-    const isConfirmed = window.confirm("Are you sure you want to remove this product?");
+    const isConfirmed = window.confirm(
+      "Are you sure you want to remove this product?"
+    );
     if (!isConfirmed) return;
 
     setDeletingId(id);
@@ -33,7 +34,7 @@ const List = ({ token }) => {
         { id },
         {
           headers: {
-            token, // send token correctly
+            token,
           },
         }
       );
@@ -86,7 +87,7 @@ const List = ({ token }) => {
               className="bg-white rounded-xl shadow-md hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 ease-in-out flex flex-col"
             >
               {/* Product Image */}
-              <div className="relative w-full h-full overflow-hidden rounded-t-xl">
+              <div className="relative w-full h-48 overflow-hidden rounded-t-xl">
                 <img
                   src={
                     product.image?.[0]?.startsWith("http")
@@ -113,12 +114,28 @@ const List = ({ token }) => {
                 </p>
 
                 <p className="text-lg font-bold text-blue-600 mt-3">
-                  ${product.price}
+                  £{product.price}
                 </p>
 
                 <div className="flex justify-between text-xs text-gray-500 mt-2">
                   <span>{product.category}</span>
                   <span>{product.sizes?.join(", ") || "N/A"}</span>
+                </div>
+
+                {/* ✅ Stock Info */}
+                <div className="mt-2 text-sm font-medium text-gray-700">
+                  Stock:{" "}
+                  <span
+                    className={`${
+                      product.stock > 10
+                        ? "text-green-600"
+                        : product.stock > 0
+                        ? "text-orange-500"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {product.stock > 0 ? product.stock : "Out of Stock"}
+                  </span>
                 </div>
 
                 {/* Remove Button */}

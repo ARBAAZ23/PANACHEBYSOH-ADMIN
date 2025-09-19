@@ -8,6 +8,8 @@ import Orders from "./pages/Orders";
 import Login from "./components/Login";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import User from "./pages/User";
+import Analysis from "./pages/Analysis";
 
 const App = () => {
   const [token, setToken] = useState(
@@ -35,6 +37,8 @@ const App = () => {
                 <Route path="/add" element={<Add token={token} />} />
                 <Route path="/list" element={<List token={token} />} />
                 <Route path="/orders" element={<Orders token={token} />} />
+                <Route path='/users' element={<User token={token}/>}/>
+                <Route path='analysis' element={<Analysis token={token}/>}/>
               </Routes>
             </div>
           </div>
