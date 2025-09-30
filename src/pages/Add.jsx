@@ -151,19 +151,6 @@ const Add = () => {
         />
       </div>
 
-      {/* Stock */}
-      <div>
-        <p className="font-semibold">Product Stock</p>
-        <input
-          type="number"
-          placeholder="Enter stock quantity"
-          required
-          value={stock}
-          onChange={(e) => setStock(e.target.value)}
-          className="border p-2 rounded w-full"
-        />
-      </div>
-
       {/* Category */}
       <div>
         <p className="font-semibold">Product Category</p>

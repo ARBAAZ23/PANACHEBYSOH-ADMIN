@@ -4,26 +4,16 @@ import { backendUrl } from "../assets/config";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
+  LineChart, Line,
+  BarChart, Bar,
+  XAxis, YAxis, Tooltip,
+  CartesianGrid, Legend, ResponsiveContainer
 } from "recharts";
-
-const COLORS = ["#4F46E5", "#22C55E", "#EF4444", "#F59E0B"];
 
 const Analysis = ({ token }) => {
   const [salesData, setSalesData] = useState([]);
-  const [profitLossData, setProfitLossData] = useState([]);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalSales, setTotalSales] = useState(0);
   const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +24,8 @@ const Analysis = ({ token }) => {
 
       if (res.data.success) {
         setSalesData(res.data.salesOverTime || []);
-        setProfitLossData(res.data.profitLoss || []);
+        setTotalOrders(res.data.totalOrders || 0);
+        setTotalSales(res.data.totalSales || 0);
         setTopProducts(res.data.topProducts || []);
       } else {
         toast.error("Failed to fetch analysis data");
@@ -62,72 +53,53 @@ const Analysis = ({ token }) => {
 
   return (
     <motion.div
-      className="p-4 md:p-8 space-y-8"
+      className="p-6 md:p-10 space-y-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
       {/* Header */}
-      <h2 className="text-2xl font-bold text-gray-800">📊 Sales Analysis</h2>
+      <h2 className="text-3xl font-extrabold text-gray-800">📊 Sales Analysis</h2>
+      <p className="text-gray-600">Overview of orders and sales performance</p>
 
-      {/* Row of Charts */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Sales Over Time */}
-        <div className="bg-white p-4 rounded-xl shadow">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
-            Sales Over Time
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={salesData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="sales" stroke="#4F46E5" />
-            </LineChart>
-          </ResponsiveContainer>
+        <div className="bg-white shadow rounded-2xl p-6">
+          <p className="text-gray-500">Total Orders</p>
+          <h3 className="text-2xl font-bold text-gray-800">{totalOrders}</h3>
         </div>
-
-        {/* Profit vs Loss */}
-        <div className="bg-white p-4 rounded-xl shadow">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
-            Profit vs Loss
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={profitLossData}
-                dataKey="value"
-                nameKey="type"
-                outerRadius={120}
-                fill="#4F46E5"
-                label
-              >
-                {profitLossData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="bg-white shadow rounded-2xl p-6">
+          <p className="text-gray-500">Total Sales</p>
+          <h3 className="text-2xl font-bold text-green-600">£{totalSales}</h3>
         </div>
       </div>
 
-      {/* Top Products */}
-      <div className="bg-white p-4 rounded-xl shadow">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">
-          Top Selling Products
-        </h3>
-        <ResponsiveContainer width="100%" height={300}>
+      {/* Line Chart: Sales Over Time */}
+      <div className="bg-white p-6 rounded-2xl shadow">
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Monthly Sales</h3>
+        <ResponsiveContainer width="100%" height={350}>
+          <LineChart data={salesData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="sales" stroke="#22C55E" strokeWidth={2} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Bar Chart: Top Products */}
+      <div className="bg-white p-6 rounded-2xl shadow">
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Top Products This Month</h3>
+        <ResponsiveContainer width="100%" height={350}>
           <BarChart data={topProducts}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="sales" fill="#22C55E" />
+            <Bar dataKey="sales" fill="#4F46E5" />
           </BarChart>
         </ResponsiveContainer>
       </div>

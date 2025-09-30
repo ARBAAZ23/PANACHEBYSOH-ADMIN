@@ -6,6 +6,8 @@ import parcel_icon from './parcel_icon.svg'
 import list_icon from './list_icon.png'
 import user_icon from './user.png'
 import analysis_icon from './analysis_icon.png'
+import upload from './upload.png'
+import about from './about.png'
 
 export const assets = {
     logo,
@@ -15,6 +17,8 @@ export const assets = {
     parcel_icon,
     list_icon,
     user_icon,
-    analysis_icon
+    analysis_icon,
+    upload,
+    about
 }
 
