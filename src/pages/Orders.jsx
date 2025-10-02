@@ -9,7 +9,7 @@ const Orders = ({ token }) => {
   const [loading, setLoading] = useState(true);
 
   // Available statuses for admin
-  const statuses = ["Placed", "Packing", "Dispatched", "Delivering", "Delivered"];
+  const statuses = ["Order Placed", "Dispatched", "Shipping", "Out for Delivery", "Delivered"];
 
   // ✅ Fetch all orders
   const fetchAllOrders = async () => {
@@ -40,7 +40,7 @@ const Orders = ({ token }) => {
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       const response = await axios.post(
-        `${backendUrl}api/order/status`, // ✅ FIXED route
+        `${backendUrl}api/order/status`,
         { orderId, status: newStatus },
         { headers: { token } }
       );
@@ -106,6 +106,16 @@ const Orders = ({ token }) => {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* ✅ User Info */}
+            <div className="mb-4 text-sm text-gray-700 space-y-1">
+              <p><span className="font-medium">Name:</span> {order.userId?.name}</p>
+              <p><span className="font-medium">Email:</span> {order.userId?.email}</p>
+              <p>
+                <span className="font-medium">Address:</span>{" "}
+                {order.address?.street}, {order.address?.city}, {order.address?.pincode}
+              </p>
             </div>
 
             {/* Items */}

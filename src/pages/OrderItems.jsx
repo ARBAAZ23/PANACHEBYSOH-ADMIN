@@ -6,15 +6,23 @@ const OrderItems = ({ item }) => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Determine the quantity key (size, etc.)
   const sizeKey = Object.keys(item).find(
-    (k) => !["id", "name", "image"].includes(k)
+    (k) => !["id", "name", "image", "_id", "productId"].includes(k)
   );
-  const quantity = item[sizeKey];
+  const quantity = item[sizeKey] || 1;
+
+  // Try to find the product ID from possible keys
+  const productId = item.id || item._id || item.productId;
 
   useEffect(() => {
     const fetchProduct = async () => {
+      if (!productId) {
+        setLoading(false);
+        return;
+      }
       try {
-        const response = await axios.get(`${backendUrl}api/product/${item.id}`);
+        const response = await axios.get(`${backendUrl}api/product/${productId}`);
         if (response.data.success) {
           setProduct(response.data.product);
         }
@@ -26,7 +34,7 @@ const OrderItems = ({ item }) => {
     };
 
     fetchProduct();
-  }, [item.id]);
+  }, [productId]);
 
   if (loading) {
     return <p className="text-gray-400 text-sm">Loading product...</p>;
