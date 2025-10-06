@@ -5,7 +5,9 @@ const HeroAdmin = () => {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState("");
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL.endsWith("/")
+    ? import.meta.env.VITE_BACKEND_URL
+    : import.meta.env.VITE_BACKEND_URL + "/";
 
   const handleUpload = async () => {
     if (!file || !title.trim()) {
@@ -86,3 +88,4 @@ const HeroAdmin = () => {
 };
 
 export default HeroAdmin;
+  

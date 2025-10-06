@@ -12,7 +12,8 @@ const Add = () => {
   const [category, setCategory] = useState("");
   const [sizes, setSizes] = useState([]);
   const [bestseller, setBestseller] = useState(false);
-  const [stock, setStock] = useState(""); // ✅ new state for stock
+  const [stock, setStock] = useState("");      // ✅ stock state
+  const [weight, setWeight] = useState("");    // ✅ new weight state
 
   const handleImageChange = (e, index) => {
     const file = e.target.files[0];
@@ -45,7 +46,8 @@ const Add = () => {
     formData.append("category", category);
     formData.append("sizes", JSON.stringify(sizes));
     formData.append("bestseller", bestseller);
-    formData.append("stock", stock); // ✅ send stock value to backend
+    formData.append("stock", stock);
+    formData.append("weight", weight); // ✅ include weight
 
     images.forEach((file, i) => {
       if (file) {
@@ -74,6 +76,7 @@ const Add = () => {
         setSizes([]);
         setBestseller(false);
         setStock("");
+        setWeight(""); // ✅ reset weight
         setImages(Array(5).fill(null));
         setImagePreviews(Array(5).fill(null));
       } else {
@@ -147,6 +150,19 @@ const Add = () => {
           required
           value={price}
           onChange={(e) => setPrice(e.target.value)}
+          className="border p-2 rounded w-full"
+        />
+      </div>
+
+      {/* Weight */}
+      <div>
+        <p className="font-semibold">Product Weight (in grams)</p>
+        <input
+          type="number"
+          placeholder="e.g. 500"
+          required
+          value={weight}
+          onChange={(e) => setWeight(e.target.value)}
           className="border p-2 rounded w-full"
         />
       </div>
