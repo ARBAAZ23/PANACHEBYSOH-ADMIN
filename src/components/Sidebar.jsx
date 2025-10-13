@@ -12,7 +12,7 @@ const Sidebar = () => {
 
   return (
     <div className="h-screen w-16 md:w-56 bg-white border-r border-gray-200 flex flex-col justify-between animate-slideIn">
-      
+
       {/* Menu items */}
       <div>
         <nav className="flex flex-col mt-6 text-sm font-medium">
@@ -36,27 +36,33 @@ const Sidebar = () => {
           </NavLink>
 
           {/* All Users */}
-           <NavLink to="/Users" className={linkClasses}>
+          <NavLink to="/Users" className={linkClasses}>
             <img className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" src={assets.user_icon} alt="Orders" />
             <span className='hidden md:inline'>All Users</span>
           </NavLink>
 
-           {/* Analysis */}
-           <NavLink to="/Analysis" className={linkClasses}>
+          {/* Analysis */}
+          <NavLink to="/Analysis" className={linkClasses}>
             <img className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" src={assets.analysis_icon} alt="Orders" />
             <span className='hidden md:inline'>Analysis</span>
           </NavLink>
 
-          {/* Video*/ }
+          {/* Video*/}
           <NavLink to="/hero" className={linkClasses}>
             <img className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" src={assets.upload} alt="UploadHome" />
             <span className='hidden md:inline'>UploadHome</span>
           </NavLink>
 
-           {/* Image*/ }
+          {/* Image*/}
           <NavLink to="/about" className={linkClasses}>
             <img className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" src={assets.about} alt="UploadAbout" />
             <span className='hidden md:inline'>UploadAbout</span>
+          </NavLink>
+
+          {/*Invoice */}
+          <NavLink to="/invoice" className={linkClasses}>
+            <img className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" src={assets.invoice} alt="UploadAbout" />
+            <span className='hidden md:inline'>All Invoices</span>
           </NavLink>
 
         </nav>

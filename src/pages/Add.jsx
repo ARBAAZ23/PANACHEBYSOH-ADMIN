@@ -12,8 +12,7 @@ const Add = () => {
   const [category, setCategory] = useState("");
   const [sizes, setSizes] = useState([]);
   const [bestseller, setBestseller] = useState(false);
-  const [stock, setStock] = useState("");      // ✅ stock state
-  const [weight, setWeight] = useState("");    // ✅ new weight state
+  const [weight, setWeight] = useState(""); // ✅ keep weight only
 
   const handleImageChange = (e, index) => {
     const file = e.target.files[0];
@@ -38,15 +37,14 @@ const Add = () => {
     e.preventDefault();
 
     const token = localStorage.getItem("token");
-
     const formData = new FormData();
+
     formData.append("name", productName);
     formData.append("description", description);
     formData.append("price", price);
     formData.append("category", category);
     formData.append("sizes", JSON.stringify(sizes));
     formData.append("bestseller", bestseller);
-    formData.append("stock", stock);
     formData.append("weight", weight); // ✅ include weight
 
     images.forEach((file, i) => {
@@ -68,23 +66,22 @@ const Add = () => {
       console.log("Server response:", data);
 
       if (res.ok) {
-        alert("Product added successfully!");
+        alert("✅ Product added successfully!");
         setProductName("");
         setDescription("");
         setPrice("");
         setCategory("");
         setSizes([]);
         setBestseller(false);
-        setStock("");
-        setWeight(""); // ✅ reset weight
+        setWeight("");
         setImages(Array(5).fill(null));
         setImagePreviews(Array(5).fill(null));
       } else {
-        alert("Error: " + data.message);
+        alert("❌ Error: " + data.message);
       }
     } catch (error) {
       console.error(error);
-      alert("Failed to add product.");
+      alert("⚠️ Failed to add product.");
     }
   };
 

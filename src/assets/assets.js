@@ -8,6 +8,7 @@ import user_icon from './user.png'
 import analysis_icon from './analysis_icon.png'
 import upload from './upload.png'
 import about from './about.png'
+import invoice from './invoice.png'
 
 export const assets = {
     logo,
@@ -19,6 +20,7 @@ export const assets = {
     user_icon,
     analysis_icon,
     upload,
-    about
+    about,
+    invoice
 }
 

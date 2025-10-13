@@ -12,6 +12,7 @@ import User from "./pages/User";
 import Analysis from "./pages/Analysis";
 import HeroAdmin from "./pages/HeroAdmin";
 import AboutAdmin from "./pages/AboutAdmin";
+import Invoice from './pages/Invoices'
 
 const App = () => {
   const [token, setToken] = useState(
@@ -39,14 +40,15 @@ const App = () => {
                 <Route path="/add" element={<Add token={token} />} />
                 <Route path="/list" element={<List token={token} />} />
                 <Route path="/orders" element={<Orders token={token} />} />
-                <Route path='/users' element={<User token={token}/>}/>
-                <Route path='/analysis' element={<Analysis token={token}/>}/>
-                <Route path="/hero" element={<HeroAdmin token={token}/>} />
-                <Route path = "/about" element={<AboutAdmin token={token} />}/>
+                <Route path='/users' element={<User token={token} />} />
+                <Route path='/analysis' element={<Analysis token={token} />} />
+                <Route path="/hero" element={<HeroAdmin token={token} />} />
+                <Route path="/about" element={<AboutAdmin token={token} />} />
+                <Route path="/invoice" element={<Invoice token={token} />} />
               </Routes>
             </div>
           </div>
-        </> 
+        </>
       )}
     </>
   );

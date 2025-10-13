@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { backendUrl } from "../assets/config";
+import { backendUrl } from "../assets/config"; // Make sure this ends with a "/"
 
 const OrderItems = ({ item }) => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Determine the quantity key (size, etc.)
+  // Get quantity key (e.g., "M", "L", etc.)
   const sizeKey = Object.keys(item).find(
     (k) => !["id", "name", "image", "_id", "productId"].includes(k)
   );
   const quantity = item[sizeKey] || 1;
 
-  // Try to find the product ID from possible keys
-  const productId = item.id || item._id || item.productId;
+  // Safely extract product ID (check if it's an object or string)
+  const rawId = item.id || item._id || item.productId;
+  const productId = typeof rawId === "object" ? rawId._id : rawId;
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -21,6 +22,7 @@ const OrderItems = ({ item }) => {
         setLoading(false);
         return;
       }
+
       try {
         const response = await axios.get(`${backendUrl}api/product/${productId}`);
         if (response.data.success) {
