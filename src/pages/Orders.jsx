@@ -1,17 +1,48 @@
+// Orders.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { backendUrl } from "../assets/config";
 import { toast } from "react-toastify";
-import OrderItems from "./OrderItems"; // component to show items
+import OrderItems from "./OrderItems";
+import enUS from "date-fns/locale/en-US";
+import {
+  Calendar as BigCalendar,
+  dateFnsLocalizer,
+} from "react-big-calendar";
+import format from "date-fns/format";
+import parse from "date-fns/parse";
+import startOfWeek from "date-fns/startOfWeek";
+import getDay from "date-fns/getDay";
+import endOfDay from "date-fns/endOfDay";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+
+const locales = {
+  "en-US": enUS,
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
 
 const Orders = ({ token }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
 
-  // Available statuses for admin
-  const statuses = ["Order Placed", "Dispatched", "Shipping", "Out for Delivery", "Delivered"];
+  const statuses = [
+    "Order Placed",
+    "Dispatched",
+    "Shipping",
+    "Out for Delivery",
+    "Delivered",
+  ];
 
-  // ✅ Fetch all orders
+  // Fetch all orders
   const fetchAllOrders = async () => {
     if (!token) return;
 
@@ -24,7 +55,21 @@ const Orders = ({ token }) => {
       );
 
       if (response.data.success) {
-        setOrders(response.data.orders);
+        const fetched = response.data.orders;
+        setOrders(fetched);
+
+        // Convert to calendar events
+        const evs = fetched.map((ord) => {
+          const dateObj = new Date(ord.date);
+          return {
+            title: `#${ord._id.slice(-6)}`,
+            allDay: true,
+            start: dateObj,
+            end: endOfDay(dateObj),
+            orderId: ord._id,
+          };
+        });
+        setEvents(evs);
       } else {
         toast.error("Failed to fetch orders");
       }
@@ -36,7 +81,7 @@ const Orders = ({ token }) => {
     }
   };
 
-  // ✅ Update order status by admin
+  // Update order status
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       const response = await axios.post(
@@ -47,7 +92,7 @@ const Orders = ({ token }) => {
 
       if (response.data.success) {
         toast.success("Order status updated");
-        fetchAllOrders(); // refresh after update
+        await fetchAllOrders();
       } else {
         toast.error("Failed to update status");
       }
@@ -59,7 +104,6 @@ const Orders = ({ token }) => {
 
   useEffect(() => {
     fetchAllOrders();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   if (loading) {
@@ -78,75 +122,121 @@ const Orders = ({ token }) => {
     );
   }
 
+  const ordersOnSelectedDate = selectedDate
+    ? orders.filter((ord) => {
+        const od = new Date(ord.date);
+        return (
+          od.getFullYear() === selectedDate.getFullYear() &&
+          od.getMonth() === selectedDate.getMonth() &&
+          od.getDate() === selectedDate.getDate()
+        );
+      })
+    : [];
+
   return (
-    <div className="p-4 md:p-8">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">Manage Orders</h2>
+    <div className="p-4 md:p-8 space-y-8">
+      <h2 className="text-2xl font-semibold text-gray-800">Manage Orders</h2>
 
-      <div className="space-y-6">
-        {orders.map((order, index) => (
-          <div
-            key={index}
-            className="border border-gray-200 rounded-xl p-4 shadow-sm bg-white"
-          >
-            {/* Order Header */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-              <p className="text-gray-700 text-sm">
-                <span className="font-medium">Order ID:</span> {order._id}
-              </p>
+      {/* Calendar */}
+      <div className="border rounded-xl overflow-hidden shadow bg-white">
+        <BigCalendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          selectable
+          onSelectSlot={({ start }) => setSelectedDate(start)}
+          onSelectEvent={(event) => setSelectedDate(event.start)}
+          style={{ height: 500 }}
+        />
+      </div>
 
-              {/* Admin dropdown to change status */}
-              <select
-                value={order.status}
-                onChange={(e) => updateOrderStatus(order._id, e.target.value)}
-                className="border rounded-lg px-3 py-1 text-sm"
-              >
-                {statuses.map((status, i) => (
-                  <option key={i} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </div>
+      {/* Orders on Selected Date */}
+      {selectedDate && (
+        <div>
+          <h3 className="text-xl font-medium text-gray-700 mb-4">
+            Orders on{" "}
+            {selectedDate.toLocaleDateString(undefined, {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </h3>
 
-            {/* ✅ User Info */}
-            <div className="mb-4 text-sm text-gray-700 space-y-1">
-              <p><span className="font-medium">Name:</span> {order.userId?.name}</p>
-              <p><span className="font-medium">Email:</span> {order.userId?.email}</p>
-              <p>
-                <span className="font-medium">Address:</span>{" "}
-                {order.address?.street}, {order.address?.city}, {order.address?.pincode}
-              </p>
-            </div>
+          {ordersOnSelectedDate.length === 0 ? (
+            <p className="text-gray-500">No orders on this date.</p>
+          ) : (
+            <div className="space-y-6">
+              {ordersOnSelectedDate.map((order) => (
+                <div
+                  key={order._id}
+                  className="border border-gray-200 rounded-xl p-4 shadow-sm bg-white"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                    <p className="text-gray-700 text-sm">
+                      <span className="font-medium">Order ID:</span> {order._id}
+                    </p>
+                    <select
+                      value={order.status}
+                      onChange={(e) =>
+                        updateOrderStatus(order._id, e.target.value)
+                      }
+                      className="border rounded-lg px-3 py-1 text-sm"
+                    >
+                      {statuses.map((status, i) => (
+                        <option key={i} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-            {/* Items */}
-            <div className="mb-4 space-y-3">
-              {order.items?.map((item, idx) => (
-                <OrderItems key={idx} item={item} />
+                  <div className="mb-4 text-sm text-gray-700 space-y-1">
+                    <p>
+                      <span className="font-medium">Name:</span>{" "}
+                      {order.userId?.name}
+                    </p>
+                    <p>
+                      <span className="font-medium">Email:</span>{" "}
+                      {order.userId?.email}
+                    </p>
+                    <p>
+                      <span className="font-medium">Address:</span>{" "}
+                      {order.address?.street}, {order.address?.city},{" "}
+                      {order.address?.pincode}
+                    </p>
+                  </div>
+
+                  <div className="mb-4 space-y-3">
+                    {order.items?.map((item, idx2) => (
+                      <OrderItems key={idx2} item={item} />
+                    ))}
+                  </div>
+
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between border-t pt-3 text-sm text-gray-600">
+                    <p>
+                      <span className="font-medium">Payment:</span>{" "}
+                      {order.paymentMethod}{" "}
+                      {order.payment ? (
+                        <span className="text-green-600">(Paid)</span>
+                      ) : (
+                        <span className="text-red-500">(Pending)</span>
+                      )}
+                    </p>
+                    <p className="mt-2 md:mt-0">
+                      <span className="font-medium">Total:</span> £{order.amount}
+                    </p>
+                    <p className="mt-2 md:mt-0">
+                      <span className="font-medium">Date:</span>{" "}
+                      {new Date(order.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
               ))}
             </div>
-
-            {/* Order Footer */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between border-t pt-3 text-sm text-gray-600">
-              <p>
-                <span className="font-medium">Payment:</span>{" "}
-                {order.paymentMethod}{" "}
-                {order.payment ? (
-                  <span className="text-green-600">(Paid)</span>
-                ) : (
-                  <span className="text-red-500">(Pending)</span>
-                )}
-              </p>
-              <p className="mt-2 md:mt-0">
-                <span className="font-medium">Total:</span> £{order.amount}
-              </p>
-              <p className="mt-2 md:mt-0">
-                <span className="font-medium">Date:</span>{" "}
-                {new Date(order.date).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

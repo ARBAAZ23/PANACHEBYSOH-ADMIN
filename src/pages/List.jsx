@@ -8,6 +8,14 @@ const List = ({ token }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null); // For edit modal
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    price: "",
+    category: "",
+    sizes: "",
+  });
 
   const fetchList = async () => {
     try {
@@ -50,6 +58,49 @@ const List = ({ token }) => {
       toast.error("Failed to remove product");
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleEditClick = (product) => {
+    setEditingProduct(product._id);
+    setFormData({
+      name: product.name || "",
+      description: product.description || "",
+      price: product.price || "",
+      category: product.category || "",
+      sizes: product.sizes?.join(", ") || "",
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const submitUpdate = async () => {
+    try {
+      const response = await axios.post(
+        `${backendUrl}api/product/update`,
+        {
+          id: editingProduct,
+          ...formData,
+          sizes: formData.sizes.split(",").map((s) => s.trim()),
+        },
+        {
+          headers: { token },
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("Product updated");
+        setEditingProduct(null);
+        await fetchList();
+      } else {
+        toast.error("Failed to update product");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating product");
     }
   };
 
@@ -97,11 +148,6 @@ const List = ({ token }) => {
                   alt={product.name}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                 />
-                {product.bestseller && (
-                  <span className="absolute top-3 right-3 bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
-                    Bestseller
-                  </span>
-                )}
               </div>
 
               {/* Product Info */}
@@ -122,40 +168,97 @@ const List = ({ token }) => {
                   <span>{product.sizes?.join(", ") || "N/A"}</span>
                 </div>
 
-                {/* ✅ Stock Info */}
-                <div className="mt-2 text-sm font-medium text-gray-700">
-                  Stock:{" "}
-                  <span
-                    className={`${
-                      product.stock > 10
-                        ? "text-green-600"
-                        : product.stock > 0
-                        ? "text-orange-500"
-                        : "text-red-600"
+                {/* Buttons */}
+                <div className="mt-4 flex justify-between gap-2">
+                  <button
+                    onClick={() => handleEditClick(product)}
+                    className="px-4 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white font-medium transition"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => removeProduct(product._id)}
+                    disabled={deletingId === product._id}
+                    className={`px-4 py-2 rounded-lg text-white font-medium transition ${
+                      deletingId === product._id
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-red-500 hover:bg-red-600"
                     }`}
                   >
-                    {product.stock > 0 ? product.stock : "Out of Stock"}
-                  </span>
+                    {deletingId === product._id ? "Removing..." : "Remove"}
+                  </button>
                 </div>
-
-                {/* Remove Button */}
-                <button
-                  onClick={() => removeProduct(product._id)}
-                  disabled={deletingId === product._id}
-                  className={`mt-4 px-4 py-2 rounded-lg text-white font-medium transition-colors duration-300 ${
-                    deletingId === product._id
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-red-500 hover:bg-red-600"
-                  }`}
-                >
-                  {deletingId === product._id ? "Removing..." : "Remove"}
-                </button>
               </div>
             </div>
           ))}
         </div>
       ) : (
         <p className="text-center text-gray-500 text-lg">No products found.</p>
+      )}
+
+      {/* Edit Modal */}
+      {editingProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg space-y-4">
+            <h3 className="text-xl font-semibold text-gray-800">Edit Product</h3>
+
+            <input
+              type="text"
+              name="name"
+              placeholder="Name"
+              value={formData.name}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border rounded"
+            />
+            <textarea
+              name="description"
+              placeholder="Description"
+              value={formData.description}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border rounded"
+              rows={3}
+            />
+            <input
+              type="number"
+              name="price"
+              placeholder="Price"
+              value={formData.price}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border rounded"
+            />
+            <input
+              type="text"
+              name="category"
+              placeholder="Category"
+              value={formData.category}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border rounded"
+            />
+            <input
+              type="text"
+              name="sizes"
+              placeholder="Sizes (comma separated)"
+              value={formData.sizes}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border rounded"
+            />
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => setEditingProduct(null)}
+                className="px-4 py-2 rounded border text-gray-600 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitUpdate}
+                className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
